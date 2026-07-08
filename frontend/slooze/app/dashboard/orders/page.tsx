@@ -60,7 +60,18 @@ export default async function OrdersPage() {
   let errorMsg: string | null = null;
 
   try {
-    orders = await getOrdersList();
+    const rawOrders = await getOrdersList();
+    // Custom sort on frontend: placed/active orders on top, cancelled orders at the bottom
+    orders = [...rawOrders].sort((a, b) => {
+      const aCancelled = a.status === 'CANCELLED';
+      const bCancelled = b.status === 'CANCELLED';
+
+      if (aCancelled && !bCancelled) return 1;
+      if (!aCancelled && bCancelled) return -1;
+
+      // Keep newest orders first within the same status category
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   } catch (err: any) {
     errorMsg = err.message || 'Failed to fetch order history.';
   }

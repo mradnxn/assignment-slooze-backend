@@ -159,7 +159,7 @@ export class OrdersService {
       whereClause.userId = userId;
     }
 
-    const orders = await prisma.order.findMany({
+    return prisma.order.findMany({
       where: whereClause,
       include: {
         restaurant: true,
@@ -172,18 +172,6 @@ export class OrdersService {
       orderBy: {
         createdAt: 'desc',
       },
-    });
-
-    // Custom sort: active/placed orders first, cancelled orders at the bottom
-    return orders.sort((a, b) => {
-      const aCancelled = a.status === 'CANCELLED';
-      const bCancelled = b.status === 'CANCELLED';
-
-      if (aCancelled && !bCancelled) return 1;
-      if (!aCancelled && bCancelled) return -1;
-
-      // Keep chronological descending order for items in the same status group
-      return b.createdAt.getTime() - a.createdAt.getTime();
     });
   }
 
