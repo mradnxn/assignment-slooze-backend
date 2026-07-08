@@ -36,7 +36,7 @@ export class TenancyGuard implements CanActivate {
     }
 
     const userCountry = user.country;
-    if (!userCountry) {
+    if (user.role !== 'ADMIN' && !userCountry) {
       throw new ForbiddenException('Access denied: User country is not defined');
     }
 
